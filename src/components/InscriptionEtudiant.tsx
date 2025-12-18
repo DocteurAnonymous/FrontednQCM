@@ -19,6 +19,7 @@ const InscriptionEtudiant: React.FC = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState<string | null>(null);
+  const [userCode, setUserCode] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validation front-end
@@ -54,17 +55,22 @@ const InscriptionEtudiant: React.FC = () => {
     setIsSubmitting(false);
 
     if (!result.success) {
-      if (result.errors) {
-        const apiErrors: Record<string, string> = {};
-        Object.keys(result.errors).forEach((key) => {
-          apiErrors[key] = result.errors[key][0] || 'Erreur';
-        });
-        setErrors(apiErrors);
+      if (result.errors.server) {
+          setApiError(result.errors.server); // affiche le message de l'exception
       } else {
-        setApiError('Erreur lors de l\'envoi du formulaire');
+          // erreurs champs
+          const apiErrors: Record<string, string> = {};
+          Object.keys(result.errors).forEach((key) => {
+              apiErrors[key] = result.errors[key][0] || 'Erreur';
+          });
+          setErrors(apiErrors);
       }
-    } else {
+  } else {
       // succès → redirection vers la page QCM
+      // stocker le code de l'étudiant      
+      const code = result.data.data.code;
+      sessionStorage.setItem('etudiantCode', code);
+      setUserCode(code);
       navigate('/qcm');
     }
   };
@@ -81,7 +87,7 @@ const InscriptionEtudiant: React.FC = () => {
         {/* Affichage erreur globale API */}
         {apiError && (
           <div className="bg-red-100 text-red-700 border border-red-400 p-2 rounded mb-4">
-            {apiError}
+            Erreur du serveur
           </div>
         )}
 
@@ -223,7 +229,7 @@ const InscriptionEtudiant: React.FC = () => {
             !isFormValid || isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
           } transition`}
         >
-          {isSubmitting ? 'Envoi...' : 'Commencer l\'évaluation'}
+          {isSubmitting ? 'Enregistrement...' : 'Commencer l\'évaluation'}
         </button>
 
         {/* Accès administrateur */}

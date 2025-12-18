@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { listeQuestionnaire } from "../services/questionnaireService";
 import type { QuestionnaireType } from "../Interfaces/Questionnaire";
-import { Award, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Questionnaires = () => {
     //Récupérer la liste des questionnaires depuis l'api
@@ -16,6 +17,8 @@ const Questionnaires = () => {
     const [timeLeft, setTimeLeft] = useState(10);
     // Réponses de l'utilisateur
     const [answers, setAnswers] = useState<{[key: number]: number}>({});
+    // Pourvoir naviguer entre page
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchQuestionnaires = async () => {
@@ -33,7 +36,7 @@ const Questionnaires = () => {
 
     // Timer pour chaque question
     useEffect(() => {
-        let timer;
+        let timer:any;
         if (timeLeft > 0) {
             timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
         } else if (timeLeft === 0) {
@@ -66,17 +69,27 @@ const Questionnaires = () => {
             if (answers[i] === q.correct ) score++;
         });
         
-        const percentage = (score / questions.length) * 100;
+        const pourcentage = (score / questions.length) * 100;
         let niveau = '';
-        if (percentage < 50) niveau = 'Insuffisant';
-        else if (percentage < 60) niveau = 'Passable';
-        else if (percentage < 70) niveau = 'Assez Bien';
-        else if (percentage < 80) niveau = 'Bien';
-        else if (percentage < 90) niveau = 'Très Bien';
+        if (pourcentage < 50) niveau = 'Insuffisant';
+        else if (pourcentage < 60) niveau = 'Passable';
+        else if (pourcentage < 70) niveau = 'Assez Bien';
+        else if (pourcentage < 80) niveau = 'Bien';
+        else if (pourcentage < 90) niveau = 'Très Bien';
         else niveau = 'Excellent';
 
         // Afficher les résultats
-        alert(`Évaluation Terminée !\nScore: ${score}/${questions.length}\nNiveau: ${niveau}\nPourcentage: ${percentage.toFixed(1)}%`);
+        // alert(`Évaluation Terminée !\nScore: ${score}/${questions.length}\nNiveau: ${niveau}\nPourcentage: ${pourcentage.toFixed(1)}%`);
+        //lui rediriger vers la vue resultat
+        // ✅ Redirection vers la page résultat
+        navigate("/resultat", {
+        state: {
+            score,
+            total: questions.length,
+            pourcentage,
+            niveau,
+        },
+        });
         
         // Réinitialiser pour recommencer
         setCurrentQuestion(0);

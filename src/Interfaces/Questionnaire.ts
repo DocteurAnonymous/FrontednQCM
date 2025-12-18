@@ -4,6 +4,6 @@ export interface QuestionnaireType {
     option2 : string;
     option3 : string;
     option4 : string;
-    correct?: BigInteger;
+    correct?: number;
     code?: string;
 }
